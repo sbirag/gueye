@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gueye"
+version = "0.7.1"
+description = "Semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D with mixed and open boundary conditions"
+readme = "README.md"
+authors = [{ name = "Serigne Bira Gueye", email = "bira.gueye@ucad.edu.sn" }]
+license = "MIT"
+license-files = ["LICENSE", "Licence.txt"]
+keywords = ["Helmholtz", "finite differences", "tridiagonal inverse", "Green function", "PML", "scientific computing"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Mathematics",
+]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.22", "scipy>=1.8"]
+
+[project.optional-dependencies]
+plot = ["matplotlib"]
+test = ["pytest"]
+
+[project.scripts]
+gueye-gui = "gueye.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/sbirag/gueye"
+Repository = "https://github.com/sbirag/gueye"
+Issues = "https://github.com/sbirag/gueye/issues"
+Changelog = "https://github.com/sbirag/gueye/blob/main/CHANGELOG.md"

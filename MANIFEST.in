@@ -1,0 +1,11 @@
+include README.md
+include README_FR.md
+include CHANGELOG.md
+include LICENSE
+include Licence.txt
+include CITATION.cff
+include SECURITY.md
+recursive-include examples *.py *.png
+recursive-include validation *.py *.txt
+recursive-include tests *.py
+include RELEASE_NOTES_v0.7.1.md
