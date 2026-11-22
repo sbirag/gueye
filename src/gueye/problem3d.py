@@ -105,15 +105,23 @@ class Problem3D:
         return f[i(self.Pz), i(self.Py), i(self.Px)] + self.bc_rhs()
 
     def expand(self, U):
-        Px, Py, Pz, S = self.Px, self.Py, self.Pz, self.sides
-        full = np.zeros(self.shape, dtype=U.dtype)
+        Px, Py, Pz = self.Px, self.Py, self.Pz
+        faces = {}
+        if Pz.kl == "D": faces["bottom"] = _face(Pz.gL, self.x, self.y).T
+        if Pz.kr == "D": faces["top"] = _face(Pz.gR, self.x, self.y).T
+        if Py.kl == "D": faces["front"] = _face(Py.gL, self.x, self.z).T
+        if Py.kr == "D": faces["back"] = _face(Py.gR, self.x, self.z).T
+        if Px.kl == "D": faces["left"] = _face(Px.gL, self.y, self.z).T
+        if Px.kr == "D": faces["right"] = _face(Px.gR, self.y, self.z).T
+        dtype = np.result_type(U, *faces.values(), float) if faces else np.result_type(U, float)
+        full = np.zeros(self.shape, dtype=dtype)
         full[Pz.i0:Pz.i1 + 1, Py.i0:Py.i1 + 1, Px.i0:Px.i1 + 1] = U
-        if Pz.kl == "D": full[0] = _face(Pz.gL, self.x, self.y).T
-        if Pz.kr == "D": full[-1] = _face(Pz.gR, self.x, self.y).T
-        if Py.kl == "D": full[:, 0, :] = _face(Py.gL, self.x, self.z).T
-        if Py.kr == "D": full[:, -1, :] = _face(Py.gR, self.x, self.z).T
-        if Px.kl == "D": full[:, :, 0] = _face(Px.gL, self.y, self.z).T
-        if Px.kr == "D": full[:, :, -1] = _face(Px.gR, self.y, self.z).T
+        if "bottom" in faces: full[0] = faces["bottom"]
+        if "top" in faces: full[-1] = faces["top"]
+        if "front" in faces: full[:, 0, :] = faces["front"]
+        if "back" in faces: full[:, -1, :] = faces["back"]
+        if "left" in faces: full[:, :, 0] = faces["left"]
+        if "right" in faces: full[:, :, -1] = faces["right"]
         return full
 
     # ------------------------------------------------------------------ resolution
