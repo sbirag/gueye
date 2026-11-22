@@ -1,3 +1,10 @@
+## 0.7.2 (corrective release preparation)
+- Corrects discrete resonance wavenumbers by including the screening term `mu**2`: `k_n**2 = lambda_n + mu**2`.
+- Preserves complex prescribed Dirichlet data in 1D–3D boundary evaluation, right-hand-side assembly, and field expansion.
+- Adds regression tests for shifted resonances and complex Dirichlet data.
+- Adds reproducible benchmark scripts and separates modal setup/solve from sparse assembly/factorization/solve timings.
+- Local release validation: 166 tests passed; see `RELEASE_NOTES_v0.7.2.md`.
+
 ## 0.7.1 (release-preparation update)
 - Adds the MIT license file, citation metadata (`CITATION.cff`), project URLs, package author metadata, and a security policy.
 - Hardens the local browser interface by checking the Host authority and, when present, the Origin authority against the loopback server and its exact port; rejects invalid/negative request lengths and unsupported transfer encoding.
