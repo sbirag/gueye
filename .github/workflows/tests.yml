@@ -113,8 +113,8 @@ jobs:
               assert any(n.endswith("tests/test_api.py") for n in names)
               assert any(n.endswith("validation/benchmark_reproducible.py") for n in names)
               assert any(n.endswith("validation/test_independent_references.py") for n in names)
-  assert any(n.endswith("RELEASE_NOTES_v0.7.2.md") for n in names)
-  assert any(n.endswith("REVIEWER_RESPONSE_0.7.2.md") for n in names)
+          assert any(n.endswith("RELEASE_NOTES_v0.7.2.md") for n in names)
+          assert any(n.endswith("REVIEWER_RESPONSE_0.7.2.md") for n in names)
           print("Distribution metadata and source contents: OK")
           PY
       - name: Install built wheel and run smoke test
