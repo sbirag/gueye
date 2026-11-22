@@ -85,16 +85,21 @@ class Problem3D:
 
     # ------------------------------------------------------------------ second membre
     def bc_rhs(self):
-        Px, Py, Pz, S = self.Px, self.Py, self.Pz, self.sides
+        """Contribution reduite aux inconnues des six faces (donnees reelles ou complexes)."""
+        Px, Py, Pz = self.Px, self.Py, self.Pz
         xu, yu, zu = (P.x[P.i0:P.i1 + 1] for P in (Px, Py, Pz))
         G = dict(left=Px.gL, right=Px.gR, front=Py.gL, back=Py.gR, bottom=Pz.gL, top=Pz.gR)
-        F = np.zeros((self.Nz, self.Ny, self.Nx), dtype=np.result_type(Pz.bl, float))
-        for side, vec in (("left", Px.bl), ("right", Px.br)):          # g(y,z) -> [iz, iy]
-            F += _face(G[side], yu, zu).T[:, :, None] * vec[None, None, :]
-        for side, vec in (("front", Py.bl), ("back", Py.br)):          # g(x,z) -> [iz, ix]
-            F += _face(G[side], xu, zu).T[:, None, :] * vec[None, :, None]
-        for side, vec in (("bottom", Pz.bl), ("top", Pz.br)):          # g(x,y) -> [iy, ix]
-            F += _face(G[side], xu, yu).T[None, :, :] * vec[:, None, None]
+        terms = []
+        for side, vec in (("left", Px.bl), ("right", Px.br)):
+            terms.append(_face(G[side], yu, zu).T[:, :, None] * vec[None, None, :])
+        for side, vec in (("front", Py.bl), ("back", Py.br)):
+            terms.append(_face(G[side], xu, zu).T[:, None, :] * vec[None, :, None])
+        for side, vec in (("bottom", Pz.bl), ("top", Pz.br)):
+            terms.append(_face(G[side], xu, yu).T[None, :, :] * vec[:, None, None])
+        dtype = np.result_type(Pz.bl, *terms, float)
+        F = np.zeros((self.Nz, self.Ny, self.Nx), dtype=dtype)
+        for term in terms:
+            F += term
         return F
 
     def rhs(self, f):
