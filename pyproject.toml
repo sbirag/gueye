@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gueye"
-version = "0.7.1"
+version = "0.7.2"
 description = "Semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D with mixed and open boundary conditions"
 readme = "README.md"
 authors = [{ name = "Serigne Bira Gueye", email = "bira.gueye@ucad.edu.sn" }]
@@ -15,6 +15,7 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
