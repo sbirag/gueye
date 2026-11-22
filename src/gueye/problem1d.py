@@ -158,10 +158,12 @@ class Problem1D:
         return f[self.i0:self.i1 + 1] + self._g(self.gL, t) * self.bl + self._g(self.gR, t) * self.br
 
     def expand(self, ured, t=None):
-        u = np.zeros(self.M + 1, dtype=np.result_type(ured, float))
+        gL = self._g(self.gL, t) if self.kl == "D" else 0.0
+        gR = self._g(self.gR, t) if self.kr == "D" else 0.0
+        u = np.zeros(self.M + 1, dtype=np.result_type(ured, gL, gR, float))
         u[self.i0:self.i1 + 1] = ured
-        if self.kl == "D": u[0] = self._g(self.gL, t)
-        if self.kr == "D": u[-1] = self._g(self.gR, t)
+        if self.kl == "D": u[0] = gL
+        if self.kr == "D": u[-1] = gR
         return u
 
     # ------------------------------------------------------------------ resolution
@@ -173,7 +175,7 @@ class Problem1D:
         """Valeurs aux noeuds idx par la formule (sans resoudre le champ entier)."""
         idx = np.atleast_1d(idx)
         ured = self.K.apply_at(idx - self.i0, self.rhs(f, t))
-        out = np.asarray(ured)
+        out = np.array(ured, dtype=np.result_type(ured, self.gL, self.gR, float))
         for n, i in enumerate(idx):
             if i < self.i0: out[n] = self._g(self.gL, t)
             if i > self.i1: out[n] = self._g(self.gR, t)
