@@ -3,6 +3,7 @@
 - Preserves complex prescribed Dirichlet data in 1D–3D boundary evaluation, right-hand-side assembly, and field expansion.
 - Adds regression tests for shifted resonances and complex Dirichlet data.
 - Adds reproducible benchmark scripts and separates modal setup/solve from sparse assembly/factorization/solve timings.
+- Adds independent sparse-reference checks for Green columns, frequency sweeps and discrete resonances in 1D–3D, plus 2D Dirichlet obstacles on two geometries and two grids.
 - Local release validation: 166 tests passed; see `RELEASE_NOTES_v0.7.2.md`.
 
 ## 0.7.1 (release-preparation update)
