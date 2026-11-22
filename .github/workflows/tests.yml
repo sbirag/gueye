@@ -6,7 +6,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Ubuntu 24.04 retains the Python 3.9 toolchain used by this compatibility matrix.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
