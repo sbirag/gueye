@@ -145,9 +145,29 @@ Newmark, 2D and 3D & Sparse LU time stepping & $9.2\times10^{-15}$ and $3.4\time
 \caption{Validation results from the included scripts and regression tests. Errors are maximum relative deviations unless otherwise indicated. The boundary-condition configurations are representative, not an exhaustive enumeration of all possible face combinations.}
 \label{tab:valid}
 \end{table}
-\paragraph{API regression coverage.}
-Additional tests compare Green-function point values with the corresponding field solution, point extraction with Green-function evaluation, frequency sweeps with repeated pointwise solves, and discrete resonances with sparse eigenvalue references in 1D--3D. The regression suite also checks the $\mu^2$ resonance shift and constant or coordinate-dependent complex Dirichlet data in 1D--3D.
-The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions test and installation-smoke-test matrix passed on Python 3.9, 3.10, 3.11, 3.12 and 3.13 on both Ubuntu 24.04 and Windows Server 2022. macOS was not validated. These timings describe the local test environment and are not performance guarantees.
+\paragraph{Independent reference checks.}
+A dedicated script, \texttt{validation/test\_independent\_references.py}, compares the package against independently assembled sparse systems. Green-function columns are checked against sparse direct solutions with a point source scaled by the cell volume; frequency sweeps are checked at three complex wavenumbers against three separate sparse solves; discrete resonances are checked against the eigenvalues of the assembled discrete operator. Table~\ref{tab:independent} reports the maximum relative deviations.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Dimension & Green column & Frequency sweep & Discrete resonances\\
+\midrule
+1D & $2.42\times10^{-14}$ & $3.28\times10^{-14}$ & $5.33\times10^{-15}$\\
+2D & $1.45\times10^{-14}$ & $1.02\times10^{-14}$ & $3.13\times10^{-15}$\\
+3D & $9.88\times10^{-16}$ & $6.44\times10^{-16}$ & $1.43\times10^{-15}$\\
+\bottomrule
+\end{tabular}
+\caption{Independent sparse-reference checks for Green columns, three-frequency sweeps, and discrete resonance wavenumbers.}
+\label{tab:independent}
+\end{table}
+\paragraph{Dirichlet obstacles.}
+The embedded-obstacle capacitance formulation was compared with a direct sparse solve in which obstacle nodes are eliminated from the matrix. For circular and rectangular obstacles on $64\times32$ and $128\times64$ grids, the maximum relative field deviation was $1.58\times10^{-14}$; the maximum residual field on obstacle nodes was $7.22\times10^{-16}$. These are discrete-algebraic comparisons, not a validation of arbitrary curved-boundary geometries or of a continuum obstacle model.
+\paragraph{Residual PML reflection.}
+The algebraic elimination of explicit PML layers agrees with the reduced system to $7.3\times10^{-14}$ in 1D, $6.8\times10^{-15}$ in 2D, and $8.7\times10^{-16}$ in 3D. This is distinct from physical absorption: relative field deviations against the discrete transparent reference were $3.8\times10^{-6}$ for a 1D layer with $m=32$, $R_0=10^{-6}$ and $kh=0.2$; in 2D, with $m=16$ and $R_0=10^{-6}$, they ranged from $1.6\times10^{-5}$ to $2.3\times10^{-3}$ over tested modal incidence angles $4^\circ$--$64^\circ$; in 3D, a $12$-cell layer gave $4.3\times10^{-3}$. These errors depend on thickness, target reflection, frequency and incidence angle and are not reflection coefficients.
+\paragraph{Time-domain open-boundary check.}
+For the 1D open-domain response, Fourier synthesis with the exact discrete transparent condition differed from a large-domain Newmark reference by $1.7\times10^{-3}$ in maximum amplitude-normalised error. A PML with $m=24$ and $R_0=10^{-10}$ gave $2.7\times10^{-3}$. The time-domain PML is implemented through frequency synthesis; step-by-step Newmark propagation with a PML is not claimed.
+The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed. The GitHub Actions test and installation-smoke-test matrix passed on Python 3.9, 3.10, 3.11, 3.12 and 3.13 on both Ubuntu 24.04 and Windows Server 2022. macOS was not validated. These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
 A separate reproducible benchmark script, \path{validation/benchmark_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements cover homogeneous Dirichlet and mixed Dirichlet--Neumann configurations on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
@@ -174,7 +194,7 @@ These are small representative problems and show that sparse direct solves can b
 \section{Impact}
 \gueye{} lets a user change boundary conditions face by face, obtain Green values or frequency responses, and locate resonances of the discrete operator without assembling or factorising a sparse matrix for each case, and with guards against silent failures near resonances.
 It supports teaching and verification of finite-difference codes, since solutions are exact for the discrete operator up to rounding.
-\emph{Limitations:} the exact transparent condition applies to the last axis only; the PML is exact algebraically but keeps a physical residual reflection ($10^{-5}$--$10^{-2}$ in our tests); a frequency sweep with a PML on a diagonalised axis re-diagonalises per frequency; Newmark has no step-by-step PML; first-order terms are 1D only; the domain is a rectangular box, with a 2D embedded obstacle; the scheme is second order, with grid dispersion of order $(kh)^2/24$.
+\emph{Limitations:} the exact transparent condition applies to the last axis only; the PML is exact algebraically but keeps a configuration-dependent residual field error ($3.8\times10^{-6}$--$10^{-2}$ in our tests); a frequency sweep with a PML on a diagonalised axis re-diagonalises per frequency; Newmark has no step-by-step PML; first-order terms are 1D only; the domain is a rectangular box, with a 2D embedded obstacle; the scheme is second order, with grid dispersion of order $(kh)^2/24$.
 
 \section{Conclusions}
 \gueye{} combines a safe closed-form tridiagonal inverse with transverse diagonalisation to treat mixed, transparent and PML conditions in one to three dimensions, with documented accuracy and limits.
