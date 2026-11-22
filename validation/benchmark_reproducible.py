@@ -33,11 +33,10 @@ def median_seconds(fn, repeats: int):
     return statistics.median(samples), result
 
 
-def benchmark(label, size, cells, repeats):
+def benchmark(label, size, cells, bc, repeats):
     rng = np.random.default_rng(20261122)
     full_shape = tuple(n + 1 for n in cells[::-1])
     F = rng.standard_normal(full_shape)
-    bc = [("D", "D")] * len(size)
 
     setup_s, pb = median_seconds(
         lambda: gueye.problem(size, cells, bc, k=0.0, mu=0.0, check=False),
@@ -70,6 +69,7 @@ def benchmark(label, size, cells, repeats):
         "platform": platform.platform(),
         "repeats": repeats,
         "size": "x".join(map(str, cells)),
+        "boundary_conditions": repr(bc),
         "unknowns": int(interior.size),
         "setup_modal_s": setup_s,
         "gueye_solve_1rhs_s": modal_s,
@@ -93,10 +93,12 @@ def main():
           f"NumPy={np.__version__}; SciPy={scipy.__version__}; "
           f"platform={platform.platform()}; repeats={args.repeats}")
     cases = [
-        ("2D-DDDD", (1.0, 1.0), (40, 32)),
-        ("3D-DDDDDD", (1.0, 1.0, 1.0), (12, 10, 8)),
+        ("2D-DDDD", (1.0, 1.0), (40, 32), [("D", "D"), ("D", "D")]),
+        ("2D-DNND", (1.0, 1.0), (40, 32), [("D", "N"), ("N", "D")]),
+        ("3D-DDDDDD", (1.0, 1.0, 1.0), (12, 10, 8), [("D", "D")] * 3),
+        ("3D-DNDNDN", (1.0, 1.0, 1.0), (12, 10, 8), [("D", "N"), ("N", "D"), ("D", "N")]),
     ]
-    rows = [benchmark(name, size, cells, args.repeats) for name, size, cells in cases]
+    rows = [benchmark(name, size, cells, bc, args.repeats) for name, size, cells, bc in cases]
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", newline="", encoding="utf-8") as f:
