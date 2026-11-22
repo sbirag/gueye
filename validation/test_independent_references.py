@@ -4,7 +4,7 @@ Run with: python validation/test_independent_references.py
 The sparse reference is assembled independently from the public solver result.
 """
 import numpy as np
-import scipy.sparse.linalg as spla
+import scipy.sparse as sp\nimport scipy.sparse.linalg as spla
 
 import gueye as gy
 from gueye import recipes
@@ -49,7 +49,7 @@ def green_sparse_check(dim, size, cells, bc, source):
     node = pb.node(source)
     rhs = np.zeros(A.shape[0], dtype=complex)
     rhs[interior_index(pb, node)] = 1.0 / volume
-    reference = spla.spsolve(A, rhs).reshape(shape)
+    reference = spla.spsolve(sp.csc_matrix(A), rhs).reshape(shape)
     computed = pb.green(source)[slices]
     return relative_error(computed, reference)
 
