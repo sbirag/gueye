@@ -110,7 +110,7 @@ def obstacle_sparse_check(M, geometry):
 def main():
     print("Independent Green columns: GUEYE versus independently assembled sparse systems")
     cases = [
-        (1,  (1.0,),       (40,),       [("D", "R", 1.3)],             (0.4,)),
+        (1,  (1.0,),       (40,),       [("D", ("R", 1.3))],             (0.4,)),
         (2,  (1.0, 0.8),   (24, 20),    [("D", "R", 1.3), ("N", "D")], (0.4, 0.4)),
         (3,  (1.0, 0.8, 0.6), (12, 10, 8), [("D", "R", 1.3), ("N", "D"), ("D", "N")], (0.4, 0.4, 0.3)),
     ]
