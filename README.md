@@ -1,4 +1,4 @@
-# gueye 0.7.1 — Semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D
+# gueye 0.7.2 — Semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D
 
 `gueye` is a Python package for solving finite-difference Laplace/Helmholtz problems on rectangular grids in one, two, and three dimensions. It combines a scaled closed-form tridiagonal inverse with transverse diagonalization and supports mixed boundary conditions, selected Green-function values, frequency sweeps, discrete resonances, and time-domain responses.
 
@@ -83,7 +83,7 @@ A pair of boundary conditions is specified for each axis, in lower/upper order. 
 
 ## Validation
 
-The repository includes validation scripts and reference outputs. The release-preparation environment ran 158 automated tests successfully and the package smoke test ended with `TOUT EST OK`. Validation compares the tridiagonal kernel with dense references, multidimensional results with sparse assembly, PML elimination with explicit-layer models, and selected open-domain results with enlarged domains. See `validation/` for scripts and logs. Performance figures are environment-specific and should not be treated as universal speed guarantees.
+The repository includes validation scripts and reference outputs. The release-preparation environment ran 166 automated tests successfully and the package smoke test ended with `TOUT EST OK`. Validation compares the tridiagonal kernel with dense references, multidimensional results with sparse assembly, PML elimination with explicit-layer models, and selected open-domain results with enlarged domains. See `validation/` for scripts and logs. Performance figures are environment-specific and should not be treated as universal speed guarantees.
 
 ## Citation
 
@@ -95,7 +95,7 @@ Citation metadata are provided in [`CITATION.cff`](CITATION.cff). If you use `gu
 - **Contact:** bira.gueye@ucad.edu.sn
 - **License:** MIT; see [`LICENSE`](LICENSE) and [`Licence.txt`](Licence.txt).
 - **Repository:** https://github.com/sbirag/gueye
-- **Release:** 0.7.1
+- **Release:** 0.7.2
 
 ## AI-assisted development disclosure
 
