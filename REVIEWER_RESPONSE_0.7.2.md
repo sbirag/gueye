@@ -14,7 +14,7 @@
 `k_n^2 = lambda_n + mu^2`,
 where `lambda_n` is an eigenvalue of the discrete negative Laplacian.
 
-**Evidence.** Regression tests cover nonzero `mu` in 1D, 2D and 3D, and verify singularity detection at the shifted resonance. The independent-reference validation compares API resonance wavenumbers with eigenvalues of separately assembled discrete matrices; maximum relative deviations are (5.33\times10^{-15}), (2.09\times10^{-15}), and (3.34\times10^{-15}) in 1D, 2D and 3D, respectively.
+**Evidence.** Regression tests cover nonzero `mu` in 1D, 2D and 3D, and verify singularity detection at the shifted resonance. The independent-reference validation compares API resonance wavenumbers with eigenvalues of separately assembled discrete matrices; maximum relative deviations are (5.33\times10^{-15}), (2.31\times10^{-15}), and (2.70\times10^{-15}) in 1D, 2D and 3D, respectively.
 
 ### R1.2 — Transparent boundary scope and complex boundary data
 

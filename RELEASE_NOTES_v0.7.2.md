@@ -14,9 +14,9 @@
 - The five-repeat benchmark results are recorded in `validation/benchmark_results_0.7.2.csv`, including the measured environment and numerical relative errors. Timings are machine-specific and are not performance guarantees.
 
 ## Independent reference validation added for the SoftwareX review
-- `validation/test_independent_references.py` checks complete Green columns against independently assembled sparse systems in 1D–3D (maximum relative errors: 2.41e-14, 1.47e-14, 9.70e-16).
-- It checks three-frequency sweeps against separate sparse solves at each complex wavenumber (3.29e-14, 1.08e-14, 6.42e-16).
-- It checks discrete resonance wavenumbers against eigenvalues of independently assembled matrices (5.33e-15, 2.09e-15, 3.34e-15).
+- `validation/test_independent_references.py` checks complete Green columns against independently assembled sparse systems in 1D–3D (maximum relative errors: 2.42e-14, 1.45e-14, 9.88e-16).
+- It checks three-frequency sweeps against separate sparse solves at each complex wavenumber (3.28e-14, 1.02e-14, 6.44e-16).
+- It checks discrete resonance wavenumbers against eigenvalues of independently assembled matrices (5.33e-15, 2.31e-15, 2.70e-15).
 - It checks the 2D Dirichlet-obstacle capacitance formulation against direct sparse elimination for circular and rectangular obstacles on two grids (maximum field deviation 1.58e-14; maximum obstacle-node field 7.22e-16). These are discrete-algebraic checks, not continuum obstacle validation.
 - Open-boundary tests compare PML fields with the discrete transparent condition over selected 1D, 2D and 3D cases. The reported deviations are configuration-dependent field errors, not reflection coefficients. Only the 1D explicit-layer elimination comparison is included as a reproducible exact algebraic-elimination check.
 
