@@ -24,7 +24,7 @@
 \address{Department of Physics, Faculty of Sciences and Techniques, Cheikh Anta Diop University, Dakar, Senegal}
 
 \begin{abstract}
-\texttt{gueye} is a Python package for solving the finite-difference Helmholtz equation on rectangular grids in one, two or three dimensions, with independently specified Dirichlet, Neumann, Robin, discrete transparent or perfectly matched layer (PML) boundary conditions on each face. It combines a scaled closed-form tridiagonal inverse with transverse diagonalisation. The package computes full fields (including complex prescribed Dirichlet data), selected Green-function values, frequency sweeps and discrete resonances of the full screened operator, and includes a two-dimensional Dirichlet obstacle and time-domain responses. Validation against independent dense, sparse and explicit-layer references shows near-roundoff agreement for tested discrete problems and second-order convergence against continuous solutions.
+\texttt{gueye} is a Python package for solving the finite-difference Helmholtz equation on rectangular grids in one, two or three dimensions, with independently specified Dirichlet, Neumann or Robin conditions on each face, and discrete transparent or perfectly matched layer (PML) treatments within their supported directions. It combines a scaled closed-form tridiagonal inverse with transverse diagonalisation. The package computes full fields (including complex prescribed Dirichlet data), selected Green-function values, frequency sweeps and discrete resonances of the full screened operator, and includes a two-dimensional Dirichlet obstacle and time-domain responses. Validation against independent dense, sparse and explicit-layer references shows near-roundoff agreement for tested discrete problems and second-order convergence against continuous solutions.
 \end{abstract}
 
 \begin{keyword}
@@ -45,7 +45,7 @@ Helmholtz equation \sep finite differences \sep tridiagonal matrix inverse \sep 
 \hline
 C1 & Current code version & 0.7.2\\
 \hline
-C2 & Permanent GitHub link to code/repository used for this code version & \url{https://github.com/sbirag/gueye/tree/release/0.7.2}\\
+C2 & Permanent GitHub link to code/repository used for this code version & \url{https://github.com/sbirag/gueye/tree/e33af14f825d4ae3eb60b05037739e063316a206}\\
 \hline
 C3 & Legal Code License & MIT\\
 \hline
@@ -55,7 +55,7 @@ C5 & Software code languages, tools, and services used & Python; NumPy; SciPy; s
 \hline
 C6 & Compilation requirements, operating environments and dependencies & Python $\geq 3.9$; NumPy $\geq 1.22$; SciPy $\geq 1.8$. Release-preparation tests run on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; cross-platform behavior should be confirmed by users on their target systems.\\
 \hline
-C7 & Link to developer documentation/manual & \url{https://github.com/sbirag/gueye/blob/release/0.7.2/README.md}\\
+C7 & Link to developer documentation/manual & \url{https://github.com/sbirag/gueye/blob/e33af14f825d4ae3eb60b05037739e063316a206/README.md}\\
 \hline
 C8 & Support email for questions & bira.gueye@ucad.edu.sn\\
 \hline
@@ -155,8 +155,8 @@ A dedicated script, \texttt{validation/test\_independent\_references.py}, compar
 Dimension & Green column & Frequency sweep & Discrete resonances\\
 \midrule
 1D & $2.42\times10^{-14}$ & $3.28\times10^{-14}$ & $5.33\times10^{-15}$\\
-2D & $1.45\times10^{-14}$ & $1.02\times10^{-14}$ & $2.54\times10^{-15}$\\
-3D & $9.88\times10^{-16}$ & $6.44\times10^{-16}$ & $1.75\times10^{-15}$\\
+2D & $1.45\times10^{-14}$ & $1.02\times10^{-14}$ & $1.94\times10^{-15}$\\
+3D & $9.88\times10^{-16}$ & $6.44\times10^{-16}$ & $1.91\times10^{-15}$\\
 \bottomrule
 \end{tabular}
 \caption{Independent sparse-reference checks for Green columns, three-frequency sweeps, and discrete resonance wavenumbers.}
@@ -165,7 +165,7 @@ Dimension & Green column & Frequency sweep & Discrete resonances\\
 \paragraph{Dirichlet obstacles.}
 The embedded-obstacle capacitance formulation was compared with a direct sparse solve in which obstacle nodes are eliminated from the matrix. For circular and rectangular obstacles on $64\times32$ and $128\times64$ grids, the maximum relative field deviation was $1.58\times10^{-14}$; the maximum residual field on obstacle nodes was $7.22\times10^{-16}$. These are discrete-algebraic comparisons, not a validation of arbitrary curved-boundary geometries or of a continuum obstacle model.
 \paragraph{Residual PML reflection.}
-The algebraic elimination of explicit PML layers agrees with the reduced system to $7.3\times10^{-14}$ in 1D, $6.8\times10^{-15}$ in 2D, and $8.7\times10^{-16}$ in 3D. This is distinct from physical absorption: relative field deviations against the discrete transparent reference were $3.8\times10^{-6}$ for a 1D layer with $m=32$, $R_0=10^{-6}$ and $kh=0.2$; in 2D, with $m=16$ and $R_0=10^{-6}$, they ranged from $1.6\times10^{-5}$ to $2.3\times10^{-3}$ over tested modal incidence angles $4^\circ$--$64^\circ$; in 3D, a $12$-cell layer gave $4.3\times10^{-3}$. These errors depend on layer thickness, target reflection parameter and incidence angle for the tested configurations; they are field deviations, not reflection coefficients. A broad frequency-dependent PML parameter study remains future work.
+The algebraic elimination of the explicit PML layer agrees with the reduced system to $7.3\times10^{-14}$ in the reproducible 1D explicit-layer comparison. This algebraic check is distinct from physical absorption: relative field deviations against the discrete transparent reference were $3.8\times10^{-6}$ for a 1D layer with $m=32$, $R_0=10^{-6}$ and $kh=0.2$; in 2D, with $m=16$ and $R_0=10^{-6}$, they ranged from $1.6\times10^{-5}$ to $2.3\times10^{-3}$ over tested modal incidence angles $4^\circ$--$64^\circ$; in 3D, a $12$-cell layer gave $4.3\times10^{-3}$. These errors depend on layer thickness, target reflection parameter and incidence angle for the tested configurations; they are field deviations, not reflection coefficients. A broad frequency-dependent PML parameter study remains future work.
 \paragraph{Time-domain open-boundary check.}
 For the 1D open-domain response, Fourier synthesis with the exact discrete transparent condition differed from a large-domain Newmark reference by $1.7\times10^{-3}$ in maximum amplitude-normalised error. A PML with $m=24$ and $R_0=10^{-10}$ gave $2.7\times10^{-3}$. The time-domain PML is implemented through frequency synthesis; step-by-step Newmark propagation with a PML is not claimed.
 The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed. The GitHub Actions test and installation-smoke-test matrix passed on Python 3.9, 3.10, 3.11, 3.12 and 3.13 on both Ubuntu 24.04 and Windows Server 2022. macOS was not validated. These timings describe the local test environment and are not performance guarantees.
@@ -214,7 +214,7 @@ The author declares no known competing financial interests or personal relations
 Serigne Bira Gueye: Conceptualization, Methodology, Software, Validation, Investigation, Writing -- original draft, Writing -- review and editing.
 
 \section*{Data availability}
-No separate research dataset was generated for this software description. The source archive, examples, and validation scripts accompany the release package. The public source repository and the corrected source branch are available at \url{https://github.com/sbirag/gueye/tree/release/0.7.2}; a tagged 0.7.2 release and a permanent archive identifier (for example, a Zenodo DOI) remain to be created before final submission.
+No separate research dataset was generated for this software description. The source archive, examples, and validation scripts accompany the release package. The public source repository and the corrected source branch are available at \url{https://github.com/sbirag/gueye/tree/e33af14f825d4ae3eb60b05037739e063316a206}; a tagged 0.7.2 release and a permanent archive identifier (for example, a Zenodo DOI) remain to be created before final submission.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 During software development and the preparation of this manuscript, the author used ChatGPT (OpenAI) and Claude (Anthropic) for assistance with drafting and editing, code review and verification, troubleshooting, and technical advice. The author reviewed the suggestions and remains responsible for the software, the verification and interpretation of numerical results, the scientific content, and the final manuscript. The AI tools are not authors and were not treated as substitutes for executing the software tests or independently assessing the reported results.
@@ -237,7 +237,7 @@ During software development and the preparation of this manuscript, the author u
 \end{thebibliography}
 
 \section*{Current executable software version}
-The software described in this article is \texttt{gueye} version 0.7.2, distributed under the MIT License. The corrected 0.7.2 source is available at \url{https://github.com/sbirag/gueye/tree/release/0.7.2} on the dedicated \texttt{release/0.7.2} branch. The tagged public release and a permanent archive identifier remain to be created before submission. The GitHub Actions test matrix for this branch has passed on Python 3.9--3.13.
+The software described in this article is \texttt{gueye} version 0.7.2, distributed under the MIT License. The corrected 0.7.2 source is available at \url{https://github.com/sbirag/gueye/tree/e33af14f825d4ae3eb60b05037739e063316a206} on the dedicated \texttt{release/0.7.2} branch. The tagged public release and a permanent archive identifier remain to be created before submission. The GitHub Actions test matrix for this branch has passed on Python 3.9--3.13.
 
 \end{document}
 \endinput
