@@ -147,7 +147,7 @@ Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\time
 \end{table}
 \paragraph{API regression coverage.}
 Additional tests compare Green-function point values with the corresponding field solution, point extraction with Green-function evaluation, frequency sweeps with repeated pointwise solves, and discrete resonances with sparse eigenvalue references in 1D--3D. The regression suite also checks the $\mu^2$ resonance shift and constant or coordinate-dependent complex Dirichlet data in 1D--3D.
-The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions workflow also passed its complete test and installation-smoke-test matrix on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Ubuntu 24.04). These timings describe the local test environment and are not performance guarantees.
+The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions test and installation-smoke-test matrix passed on Python 3.9, 3.10, 3.11, 3.12 and 3.13 on both Ubuntu 24.04 and Windows Server 2022. macOS was not validated. These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
 A separate reproducible benchmark script, \path{validation/benchmark_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements cover homogeneous Dirichlet and mixed Dirichlet--Neumann configurations on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
