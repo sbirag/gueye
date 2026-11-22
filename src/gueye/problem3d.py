@@ -14,8 +14,10 @@ from .problem2d import _eigdecomp
 
 
 def _face(g, a, b):
-    A, B = np.meshgrid(a, b, indexing="ij")            # forme (len(a), len(b))
-    return (np.asarray(g(A, B), float) if callable(g) else float(g)) * np.ones(A.shape)
+    """Valeurs prescrites sur une face 3D (tableau reel ou complexe)."""
+    A, B = np.meshgrid(a, b, indexing="ij")
+    values = np.asarray(g(A, B) if callable(g) else g)
+    return np.broadcast_to(values, A.shape) * np.ones(A.shape, dtype=np.result_type(values, A, B))
 
 
 class Problem3D:
