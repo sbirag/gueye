@@ -210,3 +210,61 @@ def test_block_equals_entry():
     B = P.block(Sy, Sx, Ty, Tx)
     E = P.entry(Sy[:, None], Sx[:, None], Ty[None, :], Tx[None, :])
     assert np.abs(B - E).max() < 1e-12 * np.abs(E).max()
+
+
+@pytest.mark.parametrize("size,cells,bc", [
+    ((1.0,), (20,), ("D", "D")),
+    ((1.0, 1.0), (8, 7), [("D", "D"), ("D", "D")]),
+    ((1.0, 1.0, 1.0), (6, 5, 4), [("D", "D")] * 3),
+])
+def test_resonances_incluent_mu(size, cells, bc):
+    pb = gy.problem(size, cells, bc, mu=2.0, check=False)
+    got = pb.resonances(3)
+    A = pb.backend.dense()
+    A = A.toarray() if hasattr(A, "toarray") else A
+    expected = np.sqrt(np.sort(np.linalg.eigvals(A).real)[:3])
+    assert np.allclose(got, expected, rtol=1e-9, atol=1e-10)
+
+
+def test_dirichlet_complexe_1d_solve_et_at():
+    pb = gy.problem((1.0,), (12,), (("D", 1 + 2j), ("D", 3 - 1j)), check=False)
+    u = pb.solve(0.0)
+    assert np.iscomplexobj(u)
+    assert np.allclose(u[[0, -1]], [1 + 2j, 3 - 1j])
+    assert np.allclose(pb.at([(0.0,), (1.0,)], 0.0), [1 + 2j, 3 - 1j])
+
+
+def test_dirichlet_complexe_2d_solve_et_at():
+    pb = gy.problem((1.0, 1.0), (10, 8), [(("D", 1 + 1j), ("D", 0.0)), ("N", "N")], check=False)
+    u = pb.solve(0.0)
+    assert np.iscomplexobj(u)
+    assert np.allclose(u[:, 0], 1 + 1j)
+    assert np.allclose(pb.at([(0.0, 0.5)], 0.0), [1 + 1j])
+
+
+def test_dirichlet_complexe_3d_solve_et_at():
+    bc = [(("D", 1 - 2j), ("D", 0.0)), ("N", "N"), ("N", "N")]
+    pb = gy.problem((1.0, 1.0, 1.0), (6, 5, 4), bc, check=False)
+    u = pb.solve(0.0)
+    assert np.iscomplexobj(u)
+    assert np.allclose(u[:, :, 0], 1 - 2j)
+    assert np.allclose(pb.at([(0.0, 0.5, 0.5)], 0.0), [1 - 2j])
+
+
+def test_dirichlet_complexe_fonctionnelle_2d_3d():
+    pb2 = gy.problem((1.0, 1.0), (8, 6), [(("D", lambda y: (1 + 1j) * (1 + y)), ("D", 0.0)), ("N", "N")], check=False)
+    u2 = pb2.solve(0.0)
+    assert np.allclose(u2[:, 0], (1 + 1j) * (1 + pb2.axes[1]))
+
+    bc3 = [(("D", lambda y, z: (1 - 2j) * (1 + y + z)), ("D", 0.0)), ("N", "N"), ("N", "N")]
+    pb3 = gy.problem((1.0, 1.0, 1.0), (5, 4, 3), bc3, check=False)
+    u3 = pb3.solve(0.0)
+    expected = (1 - 2j) * (1 + pb3.axes[1][None, :, None] + pb3.axes[2][:, None, None])
+    assert np.allclose(u3[:, :, 0], expected[:, :, 0])
+
+
+def test_resonance_mu_nonzero_signalee_par_le_controle_singularite():
+    args = ((1.0,), (20,), ("D", "D"))
+    k1 = gy.problem(*args, mu=2.0, check=False).resonances(1)[0]
+    with pytest.raises(gy.SingularOperator):
+        gy.problem(*args, k=k1, mu=2.0, check=True)
