@@ -1,0 +1,119 @@
+name: Zenodo deposit — GUEYE v0.7.2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create-zenodo-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare source archive
+        env:
+          TAG: v0.7.2
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/zipball/${TAG}" \
+            -o gueye-v0.7.2.zip
+          test -s gueye-v0.7.2.zip
+
+      - name: Create Zenodo draft and upload archive
+        env:
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${ZENODO_TOKEN:-}" || {
+            echo "::error::The GitHub Actions secret ZENODO_TOKEN is missing."
+            exit 1
+          }
+
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import sys
+          import urllib.error
+          import urllib.request
+
+          token = os.environ["ZENODO_TOKEN"]
+          api = "https://zenodo.org/api/deposit/depositions"
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Content-Type": "application/json",
+          }
+          metadata = {
+              "metadata": {
+                  "title": "gueye: semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D",
+                  "upload_type": "software",
+                  "description": (
+                      "GUEYE v0.7.2 is an independent Python solver for finite-difference "
+                      "Laplace and Helmholtz problems on rectangular grids in one, two and "
+                      "three dimensions. This stable release corrects discrete resonance "
+                      "calculations, including the mass parameter contribution; adds full "
+                      "support for complex prescribed Dirichlet boundary data; and expands "
+                      "regression and independent numerical validation. The 1D, 2D and 3D "
+                      "implementations were verified against independently assembled sparse "
+                      "reference systems. All 12 CI jobs passed on Ubuntu and Windows with "
+                      "Python 3.9–3.13.\n\n"
+                      "Source code: https://github.com/sbirag/gueye\n"
+                      "Release: https://github.com/sbirag/gueye/releases/tag/v0.7.2"
+                  ),
+                  "creators": [{
+                      "name": "Gueye, Serigne Bira",
+                      "affiliation": "Department of Physics, Faculty of Sciences and Techniques, Cheikh Anta Diop University, Dakar, Senegal"
+                  }],
+                  "version": "0.7.2",
+                  "publication_date": "2026-11-22",
+                  "license": "mit",
+                  "access_right": "open",
+                  "keywords": [
+                      "Laplace equation", "Helmholtz equation", "finite differences",
+                      "semi-analytic solver", "scientific computing", "Python",
+                      "Green function", "discrete resonances"
+                  ],
+                  "related_identifiers": [{
+                      "identifier": "https://github.com/sbirag/gueye",
+                      "relation": "isSupplementTo",
+                      "scheme": "url"
+                  }]
+              }
+          }
+          request = urllib.request.Request(
+              api, data=json.dumps(metadata).encode("utf-8"),
+              headers=headers, method="POST"
+          )
+          try:
+              with urllib.request.urlopen(request) as response:
+                  deposit = json.load(response)
+          except urllib.error.HTTPError as exc:
+              print("Zenodo deposit creation failed:", exc.code, exc.read().decode("utf-8", "replace"))
+              sys.exit(1)
+
+          deposit_id = deposit["id"]
+          bucket = deposit["links"]["bucket"]
+          archive = pathlib.Path("gueye-v0.7.2.zip")
+          upload_request = urllib.request.Request(
+              f"{bucket}/{archive.name}",
+              data=archive.read_bytes(),
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Content-Type": "application/zip",
+              },
+              method="PUT",
+          )
+          try:
+              with urllib.request.urlopen(upload_request) as response:
+                  json.load(response)
+          except urllib.error.HTTPError as exc:
+              print("Zenodo file upload failed:", exc.code, exc.read().decode("utf-8", "replace"))
+              sys.exit(1)
+
+          print(f"Zenodo draft created and archive uploaded. Deposit ID: {deposit_id}")
+          print(f"Review and publish manually: https://zenodo.org/deposit/{deposit_id}")
+          PY
