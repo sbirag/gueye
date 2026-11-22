@@ -102,13 +102,19 @@ class Problem2D:
 
     def expand(self, U):
         Px, Py = self.Px, self.Py
-        full = np.zeros(self.shape, dtype=U.dtype)
+        faces = []
+        if Px.kl == "D": faces.append(_vals(Px.gL, self.y))
+        if Px.kr == "D": faces.append(_vals(Px.gR, self.y))
+        if Py.kl == "D": faces.append(_vals(Py.gL, self.x))
+        if Py.kr == "D": faces.append(_vals(Py.gR, self.x))
+        dtype = np.result_type(U, *faces, float) if faces else np.result_type(U, float)
+        full = np.zeros(self.shape, dtype=dtype)
         full[Py.i0:Py.i1 + 1, Px.i0:Px.i1 + 1] = U
-        S = self.sides
-        if Px.kl == "D": full[:, 0] = _vals(Px.gL, self.y)
-        if Px.kr == "D": full[:, -1] = _vals(Px.gR, self.y)
-        if Py.kl == "D": full[0, :] = _vals(Py.gL, self.x)
-        if Py.kr == "D": full[-1, :] = _vals(Py.gR, self.x)
+        if Px.kl == "D": full[:, 0] = faces[0]
+        if Px.kr == "D": full[:, -1] = faces[1 if Px.kl == "D" else 0]
+        offset = int(Px.kl == "D") + int(Px.kr == "D")
+        if Py.kl == "D": full[0, :] = faces[offset]
+        if Py.kr == "D": full[-1, :] = faces[offset + int(Py.kl == "D")]
         return full
 
     def with_c0(self, c0, check=False):
