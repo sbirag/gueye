@@ -133,13 +133,13 @@ Table~\ref{tab:valid} lists comparisons with independent references; the reposit
 Check & Independent reference & Observed result\\
 \midrule
 1D kernel, 89 cases & Dense inverse & $2.64\times10^{-7}$ worst case, near singularity; typically $10^{-14}$--$10^{-12}$\\
-2D modal solve, 12 boundary configurations & Sparse direct solve & $2.3\times10^{-13}$ maximum\\
-3D modal solve, 8 boundary configurations & Sparse direct solve & $9.9\times10^{-15}$ maximum\\
+2D modal solve, 12 boundary configurations & Sparse direct solve & $2.8\times10^{-13}$ maximum\\
+3D modal solve, 8 boundary configurations & Sparse direct solve & $1.5\times10^{-14}$ maximum\\
 Continuous-solution convergence & Manufactured solutions, 1D--3D & Order $2.00$ in 1D/2D; $1.99$--$2.00$ in 3D\\
-PML elimination, 1D & Explicit layer matrix & $7.5\times10^{-14}$\\
+PML elimination, 1D & Explicit layer matrix & $7.3\times10^{-14}$\\
 PML on four faces, 2D & Explicit layer matrix & $6.8\times10^{-15}$\\
 PML on six faces, 3D & Explicit layer matrix & $8.7\times10^{-16}$\\
-Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\times10^{-15}$\\
+Newmark, 2D and 3D & Sparse LU time stepping & $9.2\times10^{-15}$ and $3.4\times10^{-15}$\\
 \bottomrule
 \end{tabular}
 \caption{Validation results from the included scripts and regression tests. Errors are maximum relative deviations unless otherwise indicated. The boundary-condition configurations are representative, not an exhaustive enumeration of all possible face combinations.}
