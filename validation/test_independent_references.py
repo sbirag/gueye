@@ -77,6 +77,20 @@ def sweep_sparse_check(dim, size, cells, bc, source, receiver):
     return float(max(errors))
 
 
+def resonance_sparse_check(dim, size, cells):
+    """Compare API wavenumbers with eigenvalues of an independently assembled matrix."""
+    mu = 0.37
+    pb = gy.problem(size, cells, [("D", "D")] * dim, mu=mu, k=0.0)
+    A, _, _, _ = interior_data(pb)
+    if dim == 1:
+        eigenvalues = np.linalg.eigvalsh(np.asarray(A))
+        reference = np.sqrt(np.sort(eigenvalues)[:6])
+    else:
+        eigenvalues = spla.eigsh(A, k=6, which="SM", return_eigenvectors=False)
+        reference = np.sqrt(np.sort(eigenvalues))
+    return relative_error(pb.resonances(6), reference)
+
+
 def obstacle_sparse_check(M, geometry):
     Lx, Ly = 2.0, 1.0
     pb = gy.problem(
@@ -111,8 +125,8 @@ def main():
     print("Independent Green columns: GUEYE versus independently assembled sparse systems")
     cases = [
         (1,  (1.0,),       (40,),       [("D", ("R", 1.3))],             (0.4,)),
-        (2,  (1.0, 0.8),   (24, 20),    [("D", "R", 1.3), ("N", "D")], (0.4, 0.4)),
-        (3,  (1.0, 0.8, 0.6), (12, 10, 8), [("D", "R", 1.3), ("N", "D"), ("D", "N")], (0.4, 0.4, 0.3)),
+        (2,  (1.0, 0.8),   (24, 20),    [("D", ("R", 1.3)), ("N", "D")], (0.4, 0.4)),
+        (3,  (1.0, 0.8, 0.6), (12, 10, 8), [("D", ("R", 1.3)), ("N", "D"), ("D", "N")], (0.4, 0.4, 0.3)),
     ]
     for dim, size, cells, bc, src in cases:
         err = green_sparse_check(dim, size, cells, bc, src)
@@ -121,13 +135,19 @@ def main():
 
     print("\nFrequency sweeps: sweep() versus independent sparse solve at each complex frequency")
     sweep_cases = [
-        (1, (1.0,), (40,), [("D", "R", 1.3)], (0.4,), (0.65,)),
-        (2, (1.0, 0.8), (24, 20), [("D", "R", 1.3), ("N", "D")], (0.4, 0.4), (0.7, 0.4)),
-        (3, (1.0, 0.8, 0.6), (12, 10, 8), [("D", "R", 1.3), ("N", "D"), ("D", "N")], (0.4, 0.4, 0.3), (0.7, 0.4, 0.3)),
+        (1, (1.0,), (40,), [("D", ("R", 1.3))], (0.4,), (0.65,)),
+        (2, (1.0, 0.8), (24, 20), [("D", ("R", 1.3)), ("N", "D")], (0.4, 0.4), (0.7, 0.4)),
+        (3, (1.0, 0.8, 0.6), (12, 10, 8), [("D", ("R", 1.3)), ("N", "D"), ("D", "N")], (0.4, 0.4, 0.3), (0.7, 0.4, 0.3)),
     ]
     for dim, size, cells, bc, src, rec in sweep_cases:
         err = sweep_sparse_check(dim, size, cells, bc, src, rec)
         print(f"  {dim}D: max relative error over 3 frequencies = {err:.3e}")
+        assert err < 2e-9
+
+    print("\nDiscrete resonances: API versus eigenvalues of independently assembled sparse matrices")
+    for dim, size, cells in [(1, (1.0,), (40,)), (2, (1.0, 0.8), (16, 12)), (3, (1.0, 0.8, 0.6), (10, 8, 6))]:
+        err = resonance_sparse_check(dim, size, cells)
+        print(f"  {dim}D: max relative eigen-wavenumber error = {err:.3e}")
         assert err < 2e-9
 
     print("\nDirichlet obstacles: capacitance formulation versus independent sparse elimination")
