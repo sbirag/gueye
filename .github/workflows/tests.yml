@@ -54,6 +54,9 @@ jobs:
       - name: Run time-domain validation
         run: python validation/test_wave1d.py 2>&1 | tee validation/results/test_wave1d.txt
         shell: bash
+      - name: Run independent sparse-reference validation
+        run: python validation/test_independent_references.py 2>&1 | tee validation/results/test_independent_references.txt
+        shell: bash
       - name: Upload scientific validation logs
         uses: actions/upload-artifact@v4
         with:
