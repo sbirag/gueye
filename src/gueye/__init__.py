@@ -6,7 +6,7 @@ from .problem2d import Problem2D, Wave2D
 from .problem3d import Problem3D, Wave3D
 from .api import problem, wave, Solver, WaveSolver
 from . import recipes
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 
 
 def launch_gui(port=0, open_browser=True):
