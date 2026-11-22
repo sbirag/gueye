@@ -112,6 +112,7 @@ jobs:
               assert any(n.endswith("manuscript/gueye_softwarex_0.7.2_corrected.pdf") for n in names)
               assert any(n.endswith("tests/test_api.py") for n in names)
               assert any(n.endswith("validation/benchmark_reproducible.py") for n in names)
+              assert any(n.endswith("validation/test_independent_references.py") for n in names)
           print("Distribution metadata and source contents: OK")
           PY
       - name: Install built wheel and run smoke test
