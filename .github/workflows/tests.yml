@@ -113,7 +113,7 @@ jobs:
           PY
       - name: Install built wheel and run smoke test
         run: |
-          python -m pip install --no-deps dist/gueye-0.7.2-*.whl
+          python -m pip install dist/gueye-0.7.2-*.whl
           python -m gueye
       - uses: actions/upload-artifact@v4
         with:
