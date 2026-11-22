@@ -65,7 +65,7 @@ def sweep_sparse_check(dim, size, cells, bc, source, receiver):
         A, _, shape, volume = interior_data(pb)
         rhs = np.zeros(A.shape[0], dtype=complex)
         rhs[interior_index(pb, pb.node(source))] = 1.0 / volume
-        ref = spla.spsolve(A, rhs).reshape(shape)
+        ref = spla.spsolve(sp.csc_matrix(A), rhs).reshape(shape)
         rec = pb.node(receiver)
         P = pb.backend
         if dim == 1:
