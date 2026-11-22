@@ -215,6 +215,8 @@ class Solver:
             ev = (ev[:, None] + lam[None, :]).ravel()
             ev = ev[np.argsort(ev.real)[:max(n * 4, 400)]]
         ev = ev[np.argsort(ev.real)][:n]
+        # L operateur complet est -Delta_h + mu^2.
+        ev = ev + self.mu**2
         scale = max(1.0, np.abs(ev).max())
         if np.all(np.abs(ev.imag) <= 1e-9 * scale) and np.all(ev.real >= -1e-9 * scale):
             return np.sqrt(np.maximum(ev.real, 0.0))
