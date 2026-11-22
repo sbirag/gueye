@@ -10,3 +10,5 @@ recursive-include validation *.py *.txt
 recursive-include tests *.py
 include RELEASE_NOTES_v0.7.1.md
 recursive-include manuscript *.tex *.pdf
+include RELEASE_NOTES_v0.7.2.md
+include REVIEWER_RESPONSE_0.7.2.md
