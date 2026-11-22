@@ -13,8 +13,15 @@
 - Added `validation/benchmark_reproducible.py`, which reports modal setup, modal solve, sparse matrix assembly, sparse factorization, and sparse solves for one and multiple right-hand sides separately, for both homogeneous and mixed Dirichlet–Neumann cases in 2D and 3D.
 - The five-repeat benchmark results are recorded in `validation/benchmark_results_0.7.2.csv`, including the measured environment and numerical relative errors. Timings are machine-specific and are not performance guarantees.
 
+## Independent reference validation added for the SoftwareX review
+- `validation/test_independent_references.py` checks complete Green columns against independently assembled sparse systems in 1D–3D (maximum relative errors: 2.42e-14, 1.45e-14, 9.88e-16).
+- It checks three-frequency sweeps against separate sparse solves at each complex wavenumber (3.28e-14, 1.02e-14, 6.44e-16).
+- It checks discrete resonance wavenumbers against eigenvalues of independently assembled matrices (5.33e-15, 1.94e-15, 1.91e-15).
+- It checks the 2D Dirichlet-obstacle capacitance formulation against direct sparse elimination for circular and rectangular obstacles on two grids (maximum field deviation 1.58e-14; maximum obstacle-node field 7.22e-16). These are discrete-algebraic checks, not continuum obstacle validation.
+- Open-boundary tests compare PML fields with the discrete transparent condition over selected 1D, 2D and 3D cases. The reported deviations are configuration-dependent field errors, not reflection coefficients. Only the 1D explicit-layer elimination comparison is included as a reproducible exact algebraic-elimination check.
+
 ## Validation status
-- Full automated test suite: 166 tests passed in the local Linux environment (Python 3.13.5, NumPy 2.3.5, SciPy 1.17.0). GitHub Actions passed the full test and installation-smoke-test matrix on Python 3.9–3.13 on Ubuntu 24.04 and Windows Server 2022. macOS is not yet validated.
+- Full automated test suite: 166 tests passed in the local Linux environment (Python 3.13.5, NumPy 2.3.5, SciPy 1.17.0). GitHub Actions passed the full test and installation-smoke-test matrix on Python 3.9–3.13 on Ubuntu 24.04 and Windows Server 2022. The dedicated independent-reference validation job and the source/wheel build-and-install smoke test also passed on the frozen candidate commit. macOS is not yet validated.
 - Package smoke test: `python -m gueye`.
 - Benchmark: `python validation/benchmark_reproducible.py --repeats 5`.
 
