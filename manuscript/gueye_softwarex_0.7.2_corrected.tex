@@ -7,6 +7,7 @@
 \usepackage{array}
 \usepackage{lineno}
 \setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{2em}
 \newcommand{\gueye}{\texttt{gueye}}
 \newcommand{\ii}{\mathrm{i}}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
@@ -100,15 +101,15 @@ A PML of $m$ cells with stretching $s(t)=1-\ii\sigma(t)/k$, $\sigma(t)=\sigma_{\
 The interface \texttt{gy.problem(size, cells, bc, k, mu)} takes one pair of conditions per axis; prescribed Dirichlet values may be complex constants or coordinate-dependent functions, \texttt{"D"}, \texttt{("N",g)}, \texttt{("R",alpha,g)}, \texttt{"A"}, and \texttt{("P",m,R0)}, and provides
 \texttt{solve} (full field), \texttt{green} and \texttt{at} (point values), \texttt{sweep} (frequency response, \texttt{NaN} at singular frequencies), \texttt{resonances} (eigen-wavenumbers of $-\Delta_h+\mu^2$, with $k_n^2=\lambda_n+\mu^2$; complex $k$ when the spectrum is not real positive), and \texttt{with\_k}.
 Sources on Dirichlet nodes and points outside the box raise \texttt{ValueError}.
-\texttt{recipes.dirichlet\_obstacle} treats a 2D Dirichlet obstacle by a capacitance matrix.
-The wave equation is advanced by the Newmark scheme ($\beta=1/4$, $\gamma=1/2$) with a matrix inverted once; boundary data $g_0(\mathbf x)s(t)$ may depend on time (\texttt{bc\_time}), and \texttt{recipes.time\_response} gives open-domain responses (PML or transparent) by Fourier synthesis over complex frequencies; the PML is not available step by step.
+\path{recipes.dirichlet_obstacle} treats a 2D Dirichlet obstacle by a capacitance matrix.
+The wave equation is advanced by the Newmark scheme ($\beta=1/4$, $\gamma=1/2$) with a matrix inverted once; boundary data $g_0(\mathbf x)s(t)$ may depend on time (\texttt{bc\_time}), and \path{recipes.time_response} gives open-domain responses (PML or transparent) by Fourier synthesis over complex frequencies; the PML is not available step by step.
 
 \paragraph{Interactive graphical interface (version 0.7.2).}
 The package now includes an optional browser-based interface launched with \texttt{gueye-gui} or \texttt{python -m gueye.gui}. It is implemented with Python's standard-library HTTP server and an embedded HTML/JavaScript page, so it adds no mandatory GUI framework. The interface supports exploratory field visualization in 1D--3D, face-by-face boundary-condition selection, source and receiver placement, frequency sweeps, discrete-resonance display, a two-dimensional circular obstacle, and time-domain wave animation. Calculations call the package API; the interface is intended for local exploration and visualization, not as a network service or as independent validation of the numerical methods. The server binds to the loopback interface, checks local Host/Origin authorities against the loopback server and its port, and applies request-size and grid-size limits.
 
 \section{Illustrative examples}
 \paragraph{Open-domain scattering.}
-Figure~\ref{fig:open} shows a point source scattered by a Dirichlet disc in a domain open on all four faces (PML, $m=16$, $R_0=10^{-8}$, $k=16$, grid $200\times150$ on $4\times3$), from \texttt{examples/ex5\_ouvert\_complet.py}.
+Figure~\ref{fig:open} shows a point source scattered by a Dirichlet disc in a domain open on all four faces (PML, $m=16$, $R_0=10^{-8}$, $k=16$, grid $200\times150$ on $4\times3$), from \path{examples/ex5_ouvert_complet.py}.
 \begin{figure}[t]
 \centering\includegraphics[width=\textwidth]{../examples/ex5_ouvert_complet.png}
 \caption{Free, total and scattered fields (real part) for a point source and a Dirichlet disc in a domain with PML on four faces.}\label{fig:open}
@@ -146,7 +147,7 @@ Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\time
 The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions workflow also passed its complete test and installation-smoke-test matrix on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Ubuntu 24.04). These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
-A separate reproducible benchmark script, \texttt{validation/benchmark\_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements were obtained on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
+A separate reproducible benchmark script, \path{validation/benchmark_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements were obtained on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
 
 \begin{table}[t]
 \centering\small
