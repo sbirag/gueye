@@ -41,4 +41,4 @@ where = ["src"]
 Homepage = "https://github.com/sbirag/gueye"
 Repository = "https://github.com/sbirag/gueye"
 Issues = "https://github.com/sbirag/gueye/issues"
-Changelog = "https://github.com/sbirag/gueye/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/sbirag/gueye/blob/release/0.7.2/CHANGELOG.md"
