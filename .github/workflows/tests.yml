@@ -39,13 +39,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build
           sudo apt-get update
-          sudo apt-get install -y latexmk texlive-latex-extra texlive-publishers texlive-fonts-recommended poppler-utils
+          sudo apt-get install -y texlive-latex-extra texlive-publishers texlive-fonts-recommended poppler-utils
       - name: Compile corrected SoftwareX manuscript
         working-directory: manuscript
         run: |
           pdflatex -interaction=nonstopmode -halt-on-error gueye_softwarex_0.7.2_corrected.tex
           pdflatex -interaction=nonstopmode -halt-on-error gueye_softwarex_0.7.2_corrected.tex
-          pdfinfo gueye_softwarex_0.7.2_corrected.pdf | grep -E '^Pages:[[:space:]]+9      - name: Verify distribution metadata and source contents
+          test "$(pdfinfo gueye_softwarex_0.7.2_corrected.pdf | awk '/^Pages:/ {print $2}')" = "9"
+      - name: Build wheel and source distribution
+        run: python -m build --sdist --wheel
+      - name: Verify distribution metadata and source contents
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -78,39 +81,4 @@ jobs:
           path: |
             dist/*
             manuscript/gueye_softwarex_0.7.2_corrected.pdf
-          if-no-files-found: error
-
-      - name: Build wheel and source distribution
-        run: python -m build --sdist --wheel
-      - name: Verify distribution metadata and source contents
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import tarfile, zipfile
-          dist = Path("dist")
-          wheels = list(dist.glob("gueye-0.7.2-*.whl"))
-          sdists = list(dist.glob("gueye-0.7.2.tar.gz"))
-          assert len(wheels) == 1, wheels
-          assert len(sdists) == 1, sdists
-          with zipfile.ZipFile(wheels[0]) as z:
-              metadata = next(n for n in z.namelist() if n.endswith(".dist-info/METADATA"))
-              text = z.read(metadata).decode("utf-8")
-              assert "Name: gueye" in text and "Version: 0.7.2" in text
-              assert "Requires-Python: >=3.9" in text
-              assert any(n.endswith("gueye/api.py") for n in z.namelist())
-          with tarfile.open(sdists[0], "r:gz") as t:
-              names = t.getnames()
-              assert any(n.endswith("manuscript/gueye_softwarex_0.7.2_corrected.pdf") for n in names)
-              assert any(n.endswith("tests/test_api.py") for n in names)
-              assert any(n.endswith("validation/benchmark_reproducible.py") for n in names)
-          print("Distribution metadata and source contents: OK")
-          PY
-      - name: Install built wheel and run smoke test
-        run: |
-          python -m pip install --no-deps dist/gueye-0.7.2-*.whl
-          python -m gueye
-      - uses: actions/upload-artifact@v4
-        with:
-          name: gueye-0.7.2-distributions
-          path: dist/*
           if-no-files-found: error
