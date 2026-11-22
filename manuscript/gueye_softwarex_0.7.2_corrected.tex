@@ -1,0 +1,215 @@
+\documentclass[preprint,12pt,a4paper]{elsarticle}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{lineno}
+\setlength{\parindent}{0pt}
+\newcommand{\gueye}{\texttt{gueye}}
+\newcommand{\ii}{\mathrm{i}}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\journal{SoftwareX}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{\texttt{gueye}: semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D--2D--3D}
+
+\author{Serigne Bira Gueye\corref{cor1}}
+\ead{bira.gueye@ucad.edu.sn}
+\cortext[cor1]{Corresponding author}
+\address{Department of Physics, Faculty of Sciences and Techniques, Cheikh Anta Diop University, Dakar, Senegal}
+
+\begin{abstract}
+\texttt{gueye} is a Python package for solving the finite-difference Helmholtz equation on rectangular grids in one, two or three dimensions, with independently specified Dirichlet, Neumann, Robin, discrete transparent or perfectly matched layer (PML) boundary conditions on each face. It combines a scaled closed-form tridiagonal inverse with transverse diagonalisation. The package computes full fields (including complex prescribed Dirichlet data), selected Green-function values, frequency sweeps and discrete resonances of the full screened operator, and includes a two-dimensional Dirichlet obstacle and time-domain responses. Validation against independent dense, sparse and explicit-layer references shows near-roundoff agreement for tested discrete problems and second-order convergence against continuous solutions.
+\end{abstract}
+
+\begin{keyword}
+Helmholtz equation \sep finite differences \sep tridiagonal matrix inverse \sep Green function \sep perfectly matched layer \sep Python
+\end{keyword}
+
+\end{frontmatter}
+
+\section*{Required Metadata}
+\section*{Current code version}
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{|l|p{4.3cm}|p{6.2cm}|}
+\hline
+\textbf{Nr.} & \textbf{Code metadata description} & \textbf{Please fill in this column}\\
+\hline
+C1 & Current code version & 0.7.2\\
+\hline
+C2 & Permanent GitHub link to code/repository used for this code version & \url{https://github.com/sbirag/gueye}\\
+\hline
+C3 & Legal Code License & MIT\\
+\hline
+C4 & Code versioning system used & git\\
+\hline
+C5 & Software code languages, tools, and services used & Python; NumPy; SciPy; standard-library HTTP server and HTML/JavaScript for the optional GUI; optional Matplotlib for examples\\
+\hline
+C6 & Compilation requirements, operating environments and dependencies & Python $\geq 3.9$; NumPy $\geq 1.22$; SciPy $\geq 1.8$. Release-preparation tests run on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; cross-platform behavior should be confirmed by users on their target systems.\\
+\hline
+C7 & Link to developer documentation/manual & \url{https://github.com/sbirag/gueye#readme}\\
+\hline
+C8 & Support email for questions & bira.gueye@ucad.edu.sn\\
+\hline
+\end{tabular}
+\caption{Code metadata for \texttt{gueye} version 0.7.2.}
+\label{tab:metadata}
+\end{table}
+
+\linenumbers
+
+\section{Motivation and significance}
+Finite-difference discretisations of the Poisson and Helmholtz equations give Kronecker-sum matrices whose one-dimensional factors are tridiagonal.
+Fast direct solvers exploit this: tensor-product methods~\cite{LynchRiceThomas1964}, Fourier-based methods and cyclic reduction~\cite{Hockney1965,BuzbeeGolubNielson1970}.
+Specialised transforms are highly efficient for regular operators and compatible boundary conditions; a sine transform, for instance, assumes Dirichlet data on every face.
+Practitioners who change the boundary condition on each face, the frequency, or the receiver positions need a framework in which these are parameters, and who often want a handful of field values rather than a whole grid.
+
+The inverse of a tridiagonal matrix has a closed form in terms of two sequences of minors~\cite{Usmani1994,HuOConnell1996,DaFonsecaPetronilho2001}, reviewed in~\cite{Meurant1992}.
+The author used it for the 1D Poisson and Helmholtz equations~\cite{Gueye2014a,Gueye2014b,Gueye2014c,Gueye2014d} and for the 2D Poisson equation through the pentadiagonal Laplacian~\cite{Gueye2022}; a general second-order BTCS+CTCS scheme using Usmani's inversion is in~\cite{Gueye2021}.
+\gueye{} is a reusable implementation that (i) evaluates the closed form safely for complex and non-symmetric coefficients and free end rows, (ii) reaches 2D and 3D by transverse diagonalisation, as in classical separation of variables~\cite{LynchRiceThomas1964}, with arbitrary end conditions on the remaining axis, (iii) includes exact discrete transparent and PML conditions, and (iv) provides pointwise Green values, sweeps, safeguards and a time-domain layer.
+
+\section{Software description}
+\subsection{Software architecture}
+\paragraph{Kernel.}
+For a tridiagonal $T$ with sub-, main and super-diagonal $l,d,u$ and roots $r_{1,2}$ of $x^2-dx+lu=0$,
+\begin{equation}\label{eq:usmani}
+(T^{-1})_{ij}=(-1)^{i+j}\,u^{\,j-i}\,\frac{\theta_{i-1}\,\varphi_{j+1}}{\theta_N}\quad(i\le j),\qquad
+\theta_i=\frac{r_1^{\,i+1}-r_2^{\,i+1}}{r_1-r_2},
+\end{equation}
+with $\theta_i$, $\varphi_i$ the leading and trailing minors~\cite{Usmani1994}.
+\texttt{TridiagInverse} evaluates~\eqref{eq:usmani} with scaled variables (hyperbolic, oscillatory and double-root regimes) and supports Neumann or Robin end rows (real or complex $\alpha$) through a ghost node.
+A solve costs $O(N)$, a single entry $O(1)$ after set-up, and a LAPACK \texttt{gttrf} factorisation is cached for repeated right-hand sides.
+A relative-determinant check raises \texttt{SingularOperator} below $10^{-10}$ and warns below $10^{-6}$.
+
+\paragraph{2D and 3D.}
+In 2D, $T_x=V\Lambda V^{-1}$ is diagonalised (\texttt{eigh\_tridiagonal} if symmetric, \texttt{eig} otherwise) and each mode $\nu$ gives a tridiagonal system in $y$ with shift $\lambda_\nu$, solved with the kernel.
+In 3D, $x$ and $y$ are diagonalised and $z$ stays in closed form with the shift $\lambda^x_\nu+\lambda^y_{\nu'}$.
+Since all modes share the same $N$, class \texttt{ModeStack} runs one vectorised $O(N)$ sweep over all modes instead of a Python loop of LU solves.
+
+\paragraph{Open boundaries.}
+The exact transparent condition (\texttt{"A"}, last axis) is the Schur complement of the discrete half-space, a geometric sequence of ratio $r$.
+A PML of $m$ cells with stretching $s(t)=1-\ii\sigma(t)/k$, $\sigma(t)=\sigma_{\max}(t/\delta)^p$, $\sigma_{\max}=(p+1)\ln(1/R_0)/(2\delta)$~\cite{Berenger1994} is eliminated by a backward Schur recurrence into the end row of the closed axis; on diagonalised axes the layer nodes are explicit and re-diagonalised per frequency.
+
+\subsection{Software functionalities}
+The interface \texttt{gy.problem(size, cells, bc, k, mu)} takes one pair of conditions per axis; prescribed Dirichlet values may be complex constants or coordinate-dependent functions, \texttt{"D"}, \texttt{("N",g)}, \texttt{("R",alpha,g)}, \texttt{"A"}, and \texttt{("P",m,R0)}, and provides
+\texttt{solve} (full field), \texttt{green} and \texttt{at} (point values), \texttt{sweep} (frequency response, \texttt{NaN} at singular frequencies), \texttt{resonances} (eigen-wavenumbers of $-\Delta_h+\mu^2$, with $k_n^2=\lambda_n+\mu^2$; complex $k$ when the spectrum is not real positive), and \texttt{with\_k}.
+Sources on Dirichlet nodes and points outside the box raise \texttt{ValueError}.
+\texttt{recipes.dirichlet\_obstacle} treats a 2D Dirichlet obstacle by a capacitance matrix.
+The wave equation is advanced by the Newmark scheme ($\beta=1/4$, $\gamma=1/2$) with a matrix inverted once; boundary data $g_0(\mathbf x)s(t)$ may depend on time (\texttt{bc\_time}), and \texttt{recipes.time\_response} gives open-domain responses (PML or transparent) by Fourier synthesis over complex frequencies; the PML is not available step by step.
+
+\paragraph{Interactive graphical interface (version 0.7.2).}
+The package now includes an optional browser-based interface launched with \texttt{gueye-gui} or \texttt{python -m gueye.gui}. It is implemented with Python's standard-library HTTP server and an embedded HTML/JavaScript page, so it adds no mandatory GUI framework. The interface supports exploratory field visualization in 1D--3D, face-by-face boundary-condition selection, source and receiver placement, frequency sweeps, discrete-resonance display, a two-dimensional circular obstacle, and time-domain wave animation. Calculations call the package API; the interface is intended for local exploration and visualization, not as a network service or as independent validation of the numerical methods. The server binds to the loopback interface, checks local Host/Origin authorities against the loopback server and its port, and applies request-size and grid-size limits.
+
+\section{Illustrative examples}
+\paragraph{Open-domain scattering.}
+Figure~\ref{fig:open} shows a point source scattered by a Dirichlet disc in a domain open on all four faces (PML, $m=16$, $R_0=10^{-8}$, $k=16$, grid $200\times150$ on $4\times3$), from \texttt{examples/ex5\_ouvert\_complet.py}.
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{../examples/ex5_ouvert_complet.png}
+\caption{Free, total and scattered fields (real part) for a point source and a Dirichlet disc in a domain with PML on four faces.}\label{fig:open}
+\end{figure}
+
+\paragraph{Interactive exploration.}
+Figure~\ref{fig:gui} shows the interactive field view for a point source in a two-dimensional domain containing a circular Dirichlet obstacle. The visualization illustrates the spatial field pattern and obstacle placement; it is an interface example rather than a separate numerical validation result.
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{../examples/gui_open_obstacle.png}
+\caption{Interactive field visualization for a point source and a circular Dirichlet obstacle in a two-dimensional domain. The colour scale represents the real-valued field; the dashed circle marks the obstacle.}
+\label{fig:gui}
+\end{figure}
+
+\paragraph{Validation.}
+Table~\ref{tab:valid} lists comparisons with independent references; the repository contains the scripts (\texttt{validation/}) and 166 automated tests.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}p{5.0cm}p{3.5cm}p{3.5cm}@{}}
+\toprule
+Check & Independent reference & Observed result\\
+\midrule
+1D kernel, 89 cases & Dense inverse & $2.64\times10^{-7}$ worst case, near singularity; typically $10^{-14}$--$10^{-12}$\\
+2D modal solve, 12 boundary configurations & Sparse direct solve & $2.3\times10^{-13}$ maximum\\
+3D modal solve, 8 boundary configurations & Sparse direct solve & $9.9\times10^{-15}$ maximum\\
+Continuous-solution convergence & Manufactured solutions, 1D--3D & Order $2.00$ in 1D/2D; $1.99$--$2.00$ in 3D\\
+PML elimination, 1D & Explicit layer matrix & $7.5\times10^{-14}$\\
+PML on four faces, 2D & Explicit layer matrix & $6.8\times10^{-15}$\\
+PML on six faces, 3D & Explicit layer matrix & $8.7\times10^{-16}$\\
+Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\times10^{-15}$\\
+\bottomrule
+\end{tabular}
+\caption{Validation results from the included scripts and regression tests. Errors are maximum relative deviations unless otherwise indicated. The boundary-condition configurations are representative, not an exhaustive enumeration of all possible face combinations.}
+\label{tab:valid}
+\end{table}
+The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. These timings describe this test environment and are not performance guarantees.
+
+\section{Performance}
+A separate reproducible benchmark script, \texttt{validation/benchmark\_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements were obtained on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Case & Unknowns & Modal setup (ms) & Modal solve (ms) & Sparse factor (ms) & Sparse solve (ms)\\
+\midrule
+2D, $40\times32$ & 1,209 & 3.52 & 0.509 & 2.56 & 0.0821\\
+3D, $12\times10\times8$ & 693 & 5.03 & 0.467 & 2.74 & 0.0745\\
+\bottomrule
+\end{tabular}
+\caption{Example benchmark. Sparse assembly took 1.46 ms (2D) and 2.02 ms (3D). Four right-hand sides took 0.175 ms and 0.162 ms, respectively. Relative differences between the modal and sparse solutions were $5.8\times10^{-15}$ and $1.3\times10^{-15}$.}
+\label{tab:bench}
+\end{table}
+
+These are small representative problems and show that sparse direct solves can be faster for a single right-hand side at these sizes. The benchmark is intended to make the comparison reproducible, not to claim universal speed superiority. The method's value is its combination of face-by-face boundary conditions, pointwise Green values, frequency sweeps, and the closed-form axis solve. For a cube with homogeneous Dirichlet data, a discrete sine transform remains the natural specialised comparator.
+
+\section{Impact}
+\gueye{} lets a user change boundary conditions face by face, obtain Green values or frequency responses, and locate resonances of the discrete operator without assembling or factorising a sparse matrix for each case, and with guards against silent failures near resonances.
+It supports teaching and verification of finite-difference codes, since solutions are exact for the discrete operator up to rounding.
+\emph{Limitations:} the exact transparent condition applies to the last axis only; the PML is exact algebraically but keeps a physical residual reflection ($10^{-5}$--$10^{-2}$ in our tests); a frequency sweep with a PML on a diagonalised axis re-diagonalises per frequency; Newmark has no step-by-step PML; first-order terms are 1D only; the domain is a rectangular box, with a 2D embedded obstacle; the scheme is second order, with grid dispersion of order $(kh)^2/24$.
+
+\section{Conclusions}
+\gueye{} combines a safe closed-form tridiagonal inverse with transverse diagonalisation to treat mixed, transparent and PML conditions in one to three dimensions, with documented accuracy and limits.
+Future work includes the general BTCS+CTCS scheme of~\cite{Gueye2021}, step-by-step PML, and 3D obstacles.
+
+\section*{Acknowledgements}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+\section*{Funding}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+\section*{Declaration of competing interests}
+The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{CRediT authorship contribution statement}
+Serigne Bira Gueye: Conceptualization, Methodology, Software, Validation, Investigation, Writing -- original draft, Writing -- review and editing.
+
+\section*{Data availability}
+No separate research dataset was generated for this software description. The source archive, examples, and validation scripts accompany the release package. Public repository availability and a permanent archive identifier must be confirmed before final submission.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+During software development and the preparation of this manuscript, the author used ChatGPT (OpenAI) and Claude (Anthropic) for assistance with drafting and editing, code review and verification, troubleshooting, and technical advice. The author reviewed the suggestions and remains responsible for the software, the verification and interpretation of numerical results, the scientific content, and the final manuscript. The AI tools are not authors and were not treated as substitutes for executing the software tests or independently assessing the reported results.
+
+\begin{thebibliography}{99}
+\bibitem{LynchRiceThomas1964} R.~E. Lynch, J.~R. Rice, D.~H. Thomas, Direct solution of partial difference equations by tensor product methods, Numer.\ Math.\ 6 (1964) 185--199.
+\bibitem{Hockney1965} R.~W. Hockney, A fast direct solution of Poisson's equation using Fourier analysis, J.\ ACM 12 (1965) 95--113.
+\bibitem{BuzbeeGolubNielson1970} B.~L. Buzbee, G.~H. Golub, C.~W. Nielson, On direct methods for solving Poisson's equations, SIAM J.\ Numer.\ Anal.\ 7 (1970) 627--656.
+\bibitem{Usmani1994} R.~A. Usmani, Inversion of a tridiagonal Jacobi matrix, Linear Algebra Appl.\ 212--213 (1994) 413--414. \url{https://doi.org/10.1016/0024-3795(94)90414-6}
+\bibitem{HuOConnell1996} G.~Y. Hu, R.~F. O'Connell, Analytical inversion of symmetric tridiagonal matrices, J.\ Phys.\ A 29 (1996) 1511--1513. \url{https://doi.org/10.1088/0305-4470/29/7/020}
+\bibitem{DaFonsecaPetronilho2001} C.~M. da Fonseca, J.~Petronilho, Explicit inverses of some tridiagonal matrices, Linear Algebra Appl.\ 325 (2001) 7--21. \url{https://doi.org/10.1016/S0024-3795(00)00289-5}
+\bibitem{Meurant1992} G.~Meurant, A review on the inverse of symmetric tridiagonal and block tridiagonal matrices, SIAM J.\ Matrix Anal.\ Appl.\ 13 (1992) 707--728.
+\bibitem{Berenger1994} J.-P. B\'erenger, A perfectly matched layer for the absorption of electromagnetic waves, J.\ Comput.\ Phys.\ 114 (1994) 185--200.
+\bibitem{Gueye2014a} S.~B. Gueye, The exact formulation of the inverse of the tridiagonal matrix for solving the 1D Poisson equation with the finite difference method, J.\ Electromagn.\ Anal.\ Appl.\ 6 (2014) 303--308. \url{https://doi.org/10.4236/jemaa.2014.610030}
+\bibitem{Gueye2014b} S.~B. Gueye, K.~Talla, C.~Mbow, Solution of 1D Poisson equation with Neumann--Dirichlet and Dirichlet--Neumann boundary conditions, using the finite difference method, J.\ Electromagn.\ Anal.\ Appl.\ 6 (2014) 309--318. \url{https://doi.org/10.4236/jemaa.2014.610031}
+\bibitem{Gueye2014c} S.~B. Gueye, K.~Talla, C.~Mbow, Generalization of the exact solution of 1D Poisson equation with Robin boundary conditions, using the finite difference method, J.\ Electromagn.\ Anal.\ Appl.\ 6 (2014) 372--381. \url{https://doi.org/10.4236/jemaa.2014.612038}
+\bibitem{Gueye2014d} S.~B. Gueye, Semi-analytical solution of the 1D Helmholtz equation, obtained from inversion of symmetric tridiagonal matrix, J.\ Electromagn.\ Anal.\ Appl.\ 6 (2014) 425--438. \url{https://doi.org/10.4236/jemaa.2014.614044}
+\bibitem{Gueye2021} S.~B. Gueye, C.~Mbow, M.~F. Diagana, Efficient BTCS + CTCS finite difference scheme for general linear second order PDE, J.\ Electromagn.\ Anal.\ Appl.\ 13 (2021) 135--143. \url{https://doi.org/10.4236/jemaa.2021.1310010}
+\bibitem{Gueye2022} S.~B. Gueye, Exact inversion of pentadiagonal matrix for semi-analytic solution of 2D Poisson equation, J.\ Mod.\ Phys.\ 13 (2022) 1525--1529. \url{https://doi.org/10.4236/jmp.2022.1312094}
+\end{thebibliography}
+
+\section*{Current executable software version}
+The software described in this article is \texttt{gueye} version 0.7.2, distributed under the MIT License. The repository URL supplied by the author is \url{https://github.com/sbirag/gueye}. The exact 0.7.2 release must be published and its public availability verified at that URL before submission; remote CI and a permanent archive are not yet claimed as verified.
+
+\end{document}
+\endinput
