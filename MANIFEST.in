@@ -9,3 +9,4 @@ recursive-include examples *.py *.png
 recursive-include validation *.py *.txt
 recursive-include tests *.py
 include RELEASE_NOTES_v0.7.1.md
+recursive-include manuscript *.tex *.pdf
