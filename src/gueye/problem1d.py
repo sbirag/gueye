@@ -175,7 +175,7 @@ class Problem1D:
         """Valeurs aux noeuds idx par la formule (sans resoudre le champ entier)."""
         idx = np.atleast_1d(idx)
         ured = self.K.apply_at(idx - self.i0, self.rhs(f, t))
-        out = np.array(ured, dtype=np.result_type(ured, self.gL, self.gR, float))
+        out = np.asarray(ured).copy()
         for n, i in enumerate(idx):
             if i < self.i0: out[n] = self._g(self.gL, t)
             if i > self.i1: out[n] = self._g(self.gR, t)
