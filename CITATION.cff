@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use gueye in research, please cite the software and the associated SoftwareX article when available."
 title: "gueye: semi-analytic inversion of discrete Laplace/Helmholtz operators in 1D–2D–3D"
 type: software
-version: 0.7.1
-date-released: 2026-10-23
+version: 0.7.2
+date-released: 2026-11-22
 authors:
   - family-names: Gueye
     given-names: Serigne Bira
