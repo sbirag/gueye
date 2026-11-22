@@ -6,12 +6,12 @@ on:
 
 jobs:
   test:
-    # Ubuntu 24.04 retains the Python 3.9 toolchain used by this compatibility matrix.
-    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
+        os: ["ubuntu-24.04", "windows-2022", "macos-14"]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
