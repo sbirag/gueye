@@ -147,19 +147,22 @@ Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\time
 The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions workflow also passed its complete test and installation-smoke-test matrix on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Ubuntu 24.04). These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
-A separate reproducible benchmark script, \path{validation/benchmark_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements were obtained on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
+A separate reproducible benchmark script, \path{validation/benchmark_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements cover homogeneous Dirichlet and mixed Dirichlet--Neumann configurations on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
 
 \begin{table}[t]
 \centering\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}p{2.5cm}rrrrr@{}}
 \toprule
 Case & Unknowns & \shortstack{Modal setup\\(ms)} & \shortstack{Modal solve\\(ms)} & \shortstack{Sparse factor\\(ms)} & \shortstack{Sparse solve\\(ms)}\\
 \midrule
-2D, $40\times32$ & 1,209 & 3.52 & 0.509 & 2.56 & 0.0821\\
-3D, $12\times10\times8$ & 693 & 5.03 & 0.467 & 2.74 & 0.0745\\
+2D, DDDD, $40\times32$ & 1,209 & 1.95 & 0.277 & 1.73 & 0.0610\\
+2D, DN/ND, $40\times32$ & 1,280 & 1.83 & 0.251 & 1.86 & 0.0613\\
+3D, DDDDDD, $12\times10\times8$ & 693 & 3.94 & 0.351 & 2.05 & 0.0489\\
+3D, DN/ND/DN, $12\times10\times8$ & 960 & 4.56 & 0.301 & 3.47 & 0.0761\\
 \bottomrule
-\end{tabular}
-\caption{Example benchmark. Sparse assembly took 1.46 ms (2D) and 2.02 ms (3D). Four right-hand sides took 0.175 ms and 0.162 ms, respectively. Relative differences between the modal and sparse solutions were $5.8\times10^{-15}$ and $1.3\times10^{-15}$.}
+\end{tabular}}
+\caption{Five-repeat benchmark. Sparse assembly times were 0.98, 0.66, 1.28 and 1.42 ms in row order; four right-hand sides took 0.131, 0.153, 0.123 and 0.185 ms. Relative differences from the sparse direct solutions were $5.8\times10^{-15}$, $4.2\times10^{-14}$, $1.3\times10^{-15}$ and $7.2\times10^{-15}$.}
 \label{tab:bench}
 \end{table}
 
