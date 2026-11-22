@@ -143,16 +143,16 @@ Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\time
 \caption{Validation results from the included scripts and regression tests. Errors are maximum relative deviations unless otherwise indicated. The boundary-condition configurations are representative, not an exhaustive enumeration of all possible face combinations.}
 \label{tab:valid}
 \end{table}
-The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. These timings describe this test environment and are not performance guarantees.
+The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions workflow also passed its complete test and installation-smoke-test matrix on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Ubuntu 24.04). These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
 A separate reproducible benchmark script, \texttt{validation/benchmark\_reproducible.py}, separates modal setup, modal solve, sparse matrix assembly, sparse LU factorisation, and sparse triangular solves. It reports medians over repeated measurements and writes the raw results to CSV. The following measurements were obtained on Linux with Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0 (five repetitions; one right-hand side unless noted).
 
 \begin{table}[t]
 \centering\small
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}p{2.5cm}rrrrr@{}}
 \toprule
-Case & Unknowns & Modal setup (ms) & Modal solve (ms) & Sparse factor (ms) & Sparse solve (ms)\\
+Case & Unknowns & \shortstack{Modal setup\\(ms)} & \shortstack{Modal solve\\(ms)} & \shortstack{Sparse factor\\(ms)} & \shortstack{Sparse solve\\(ms)}\\
 \midrule
 2D, $40\times32$ & 1,209 & 3.52 & 0.509 & 2.56 & 0.0821\\
 3D, $12\times10\times8$ & 693 & 5.03 & 0.467 & 2.74 & 0.0745\\
@@ -186,7 +186,7 @@ The author declares no known competing financial interests or personal relations
 Serigne Bira Gueye: Conceptualization, Methodology, Software, Validation, Investigation, Writing -- original draft, Writing -- review and editing.
 
 \section*{Data availability}
-No separate research dataset was generated for this software description. The source archive, examples, and validation scripts accompany the release package. Public repository availability and a permanent archive identifier must be confirmed before final submission.
+No separate research dataset was generated for this software description. The source archive, examples, and validation scripts accompany the release package. The public source repository is available at \url{https://github.com/sbirag/gueye}; a tagged 0.7.2 release and a permanent archive identifier (for example, a Zenodo DOI) remain to be created before final submission.
 
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 During software development and the preparation of this manuscript, the author used ChatGPT (OpenAI) and Claude (Anthropic) for assistance with drafting and editing, code review and verification, troubleshooting, and technical advice. The author reviewed the suggestions and remains responsible for the software, the verification and interpretation of numerical results, the scientific content, and the final manuscript. The AI tools are not authors and were not treated as substitutes for executing the software tests or independently assessing the reported results.
@@ -209,7 +209,7 @@ During software development and the preparation of this manuscript, the author u
 \end{thebibliography}
 
 \section*{Current executable software version}
-The software described in this article is \texttt{gueye} version 0.7.2, distributed under the MIT License. The repository URL supplied by the author is \url{https://github.com/sbirag/gueye}. The exact 0.7.2 release must be published and its public availability verified at that URL before submission; remote CI and a permanent archive are not yet claimed as verified.
+The software described in this article is \texttt{gueye} version 0.7.2, distributed under the MIT License. The repository URL supplied by the author is \url{https://github.com/sbirag/gueye}. The corrected 0.7.2 source is available on the dedicated \texttt{release/0.7.2} branch. The tagged public release and a permanent archive identifier remain to be created before submission. The GitHub Actions test matrix for this branch has passed on Python 3.9--3.13.
 
 \end{document}
 \endinput
