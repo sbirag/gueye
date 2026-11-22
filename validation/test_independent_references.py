@@ -4,7 +4,8 @@ Run with: python validation/test_independent_references.py
 The sparse reference is assembled independently from the public solver result.
 """
 import numpy as np
-import scipy.sparse as sp\nimport scipy.sparse.linalg as spla
+import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 
 import gueye as gy
 from gueye import recipes
