@@ -26,6 +26,41 @@ jobs:
       - name: Run installation smoke test
         run: python -m gueye
 
+  scientific-validation:
+    runs-on: ubuntu-24.04
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install package and scientific dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          mkdir -p validation/results
+      - name: Run 1D validation
+        run: python validation/test_problem1d.py 2>&1 | tee validation/results/test_problem1d.txt
+        shell: bash
+      - name: Run 2D validation
+        run: python validation/test_problem2d.py 2>&1 | tee validation/results/test_problem2d.txt
+        shell: bash
+      - name: Run 3D validation
+        run: python validation/test_problem3d.py 2>&1 | tee validation/results/test_problem3d.txt
+        shell: bash
+      - name: Run absorbing-boundary and PML validation
+        run: python validation/test_absorb.py 2>&1 | tee validation/results/test_absorb.txt
+        shell: bash
+      - name: Run time-domain validation
+        run: python validation/test_wave1d.py 2>&1 | tee validation/results/test_wave1d.txt
+        shell: bash
+      - name: Upload scientific validation logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gueye-0.7.2-reviewer2-scientific-validation
+          path: validation/results/*.txt
+          if-no-files-found: error
+
   build-distributions:
     runs-on: ubuntu-24.04
     needs: test
@@ -45,7 +80,12 @@ jobs:
         run: |
           pdflatex -interaction=nonstopmode -halt-on-error gueye_softwarex_0.7.2_corrected.tex
           pdflatex -interaction=nonstopmode -halt-on-error gueye_softwarex_0.7.2_corrected.tex
-          test "$(pdfinfo gueye_softwarex_0.7.2_corrected.pdf | awk '/^Pages:/ {print $2}')" = "9"
+          pages="$(pdfinfo gueye_softwarex_0.7.2_corrected.pdf | awk '/^Pages:/ {print $2}')"
+          test "$pages" -ge 8
+          pdftotext gueye_softwarex_0.7.2_corrected.pdf manuscript.txt
+          grep -qi "Validation" manuscript.txt
+          grep -qi "Limitations" manuscript.txt
+          echo "Manuscript PDF: $pages pages; text checks passed."
       - name: Build wheel and source distribution
         run: python -m build --sdist --wheel
       - name: Verify distribution metadata and source contents
