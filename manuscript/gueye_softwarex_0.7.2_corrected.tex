@@ -92,6 +92,7 @@ A relative-determinant check raises \texttt{SingularOperator} below $10^{-10}$ a
 In 2D, $T_x=V\Lambda V^{-1}$ is diagonalised (\texttt{eigh\_tridiagonal} if symmetric, \texttt{eig} otherwise) and each mode $\nu$ gives a tridiagonal system in $y$ with shift $\lambda_\nu$, solved with the kernel.
 In 3D, $x$ and $y$ are diagonalised and $z$ stays in closed form with the shift $\lambda^x_\nu+\lambda^y_{\nu'}$.
 Since all modes share the same $N$, class \texttt{ModeStack} runs one vectorised $O(N)$ sweep over all modes instead of a Python loop of LU solves.
+For a fixed grid, the modal solve scales with the number of unknowns ($O(N_xN_y)$ in 2D and $O(N_xN_yN_z)$ in 3D); the full multidimensional inverse is never formed. Symmetric transverse tridiagonal operators use a dedicated tridiagonal eigensolver, whereas nonsymmetric transverse operators use a general eigensolver, whose set-up cost can dominate for large transverse dimensions. The modal arrays and transformed field require storage proportional to the grid size.
 
 \paragraph{Open boundaries.}
 The exact transparent condition (\texttt{"A"}, last axis) is the Schur complement of the discrete half-space, a geometric sequence of ratio $r$.
@@ -144,6 +145,8 @@ Newmark, 2D and 3D & Sparse LU time stepping & $7.9\times10^{-15}$ and $3.2\time
 \caption{Validation results from the included scripts and regression tests. Errors are maximum relative deviations unless otherwise indicated. The boundary-condition configurations are representative, not an exhaustive enumeration of all possible face combinations.}
 \label{tab:valid}
 \end{table}
+\paragraph{API regression coverage.}
+Additional tests compare Green-function point values with the corresponding field solution, point extraction with Green-function evaluation, frequency sweeps with repeated pointwise solves, and discrete resonances with sparse eigenvalue references in 1D--3D. The regression suite also checks the $\mu^2$ resonance shift and constant or coordinate-dependent complex Dirichlet data in 1D--3D.
 The corrective release test run used Python 3.13.5, NumPy 2.3.5 and SciPy 1.17.0; all 166 tests passed in 20.57\,s. The GitHub Actions workflow also passed its complete test and installation-smoke-test matrix on Python 3.9, 3.10, 3.11, 3.12 and 3.13 (Ubuntu 24.04). These timings describe the local test environment and are not performance guarantees.
 
 \section{Performance}
