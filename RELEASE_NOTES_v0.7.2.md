@@ -21,7 +21,7 @@
 - Open-boundary tests compare PML fields with the discrete transparent condition over selected 1D, 2D and 3D cases. The reported deviations are configuration-dependent field errors, not reflection coefficients. Only the 1D explicit-layer elimination comparison is included as a reproducible exact algebraic-elimination check.
 
 ## Validation status
-- Full automated test suite: 166 tests passed in the local Linux environment (Python 3.13.5, NumPy 2.3.5, SciPy 1.17.0). GitHub Actions passed the full test and installation-smoke-test matrix on Python 3.9–3.13 on Ubuntu 24.04 and Windows Server 2022. The dedicated independent-reference validation job and the source/wheel build-and-install smoke test also passed on the current candidate revision. macOS is not yet validated.
+- Full automated test suite: 166 tests passed in the local Linux environment (Python 3.13.5, NumPy 2.3.5, SciPy 1.17.0). GitHub Actions passed the full test and installation-smoke-test matrix on Python 3.9–3.13 on Ubuntu 24.04 and Windows Server 2022. The dedicated independent-reference validation job and the source/wheel build-and-install smoke test are included in the final-candidate CI gate; the final run must pass before the candidate is frozen. macOS is not yet validated.
 - Package smoke test: `python -m gueye`.
 - Benchmark: `python validation/benchmark_reproducible.py --repeats 5`.
 
