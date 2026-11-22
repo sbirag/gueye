@@ -28,9 +28,9 @@ def _eigdecomp(T):
 
 
 def _vals(g, coord):
-    if callable(g):
-        return np.asarray(g(coord), float) * np.ones_like(coord)
-    return float(g) * np.ones_like(coord)
+    """Valeurs de Dirichlet le long d'une face (reelles ou complexes)."""
+    values = np.asarray(g(coord) if callable(g) else g)
+    return np.broadcast_to(values, np.shape(coord)) * np.ones_like(coord, dtype=np.result_type(values, coord))
 
 
 def P_sides(P):
