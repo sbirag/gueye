@@ -25,3 +25,50 @@ jobs:
         run: python -m pytest -q tests
       - name: Run installation smoke test
         run: python -m gueye
+
+  build-distributions:
+    runs-on: ubuntu-24.04
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+      - name: Build wheel and source distribution
+        run: python -m build --sdist --wheel
+      - name: Verify distribution metadata and source contents
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import tarfile, zipfile
+          dist = Path("dist")
+          wheels = list(dist.glob("gueye-0.7.2-*.whl"))
+          sdists = list(dist.glob("gueye-0.7.2.tar.gz"))
+          assert len(wheels) == 1, wheels
+          assert len(sdists) == 1, sdists
+          with zipfile.ZipFile(wheels[0]) as z:
+              metadata = next(n for n in z.namelist() if n.endswith(".dist-info/METADATA"))
+              text = z.read(metadata).decode("utf-8")
+              assert "Name: gueye" in text and "Version: 0.7.2" in text
+              assert "Requires-Python: >=3.9" in text
+              assert any(n.endswith("gueye/api.py") for n in z.namelist())
+          with tarfile.open(sdists[0], "r:gz") as t:
+              names = t.getnames()
+              assert any(n.endswith("manuscript/gueye_softwarex_0.7.2_corrected.pdf") for n in names)
+              assert any(n.endswith("tests/test_api.py") for n in names)
+              assert any(n.endswith("validation/benchmark_reproducible.py") for n in names)
+          print("Distribution metadata and source contents: OK")
+          PY
+      - name: Install built wheel and run smoke test
+        run: |
+          python -m pip install --no-deps dist/gueye-0.7.2-*.whl
+          python -m gueye
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gueye-0.7.2-distributions
+          path: dist/*
+          if-no-files-found: error
